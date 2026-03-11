@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VBS 2026 · India Christian Assembly NJ</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange:   #F97316;
+    --amber:    #F59E0B;
+    --red:      #EF4444;
+    --green:    #22C55E;
+    --indigo:   #6366F1;
+    --text:     #1C1917;
+    --muted:    #78716C;
+    --border:   #E7E5E4;
+    --surface:  #FAFAF9;
+  }
+
+  html, body {
+    min-height: 100vh;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% -10%, rgba(249,115,22,.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 110%, rgba(245,158,11,.10) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 40% at 60% 50%, rgba(99,102,241,.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 20px;
+  }
+
+  /* ── HEADER ── */
+  .org-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: white; border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 16px;
+    font-size: .75rem; font-weight: 600; color: var(--muted);
+    letter-spacing: .04em; text-transform: uppercase;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    margin-bottom: 28px;
+    animation: fadeUp .5s ease both;
+  }
+  .org-badge::before { content: '⛪'; font-size: 1rem; }
+
+  .hero { text-align: center; margin-bottom: 52px; animation: fadeUp .5s .1s ease both; }
+
+  .hero-eyebrow {
+    font-size: .7rem; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--orange);
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 8vw, 5rem);
+    font-weight: 900; line-height: 1.05;
+    color: var(--text);
+    letter-spacing: -.02em;
+  }
+
+  .hero-title span {
+    background: linear-gradient(135deg, var(--orange), var(--amber));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    margin-top: 14px;
+    font-size: 1rem; color: var(--muted); font-weight: 500;
+    letter-spacing: .01em;
+  }
+
+  /* ── DATE STRIP ── */
+  .dates {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .date-chip {
+    background: white; border: 1.5px solid var(--border);
+    border-radius: 100px; padding: 5px 14px;
+    font-size: .78rem; font-weight: 600; color: var(--muted);
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+  .date-chip strong { color: var(--text); }
+
+  /* ── CARDS ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px; width: 100%; max-width: 760px;
+    animation: fadeUp .5s .2s ease both;
+  }
+
+  .card {
+    position: relative; overflow: hidden;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    padding: 32px 28px 28px;
+    text-decoration: none; color: inherit;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    transition: transform .25s cubic-bezier(.34,1.3,.64,1), box-shadow .25s ease, border-color .2s;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+  }
+
+  .card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 16px 40px rgba(0,0,0,.12);
+    border-color: transparent;
+  }
+
+  .card-checkin:hover  { box-shadow: 0 16px 40px rgba(34,197,94,.2); }
+  .card-checkout:hover { box-shadow: 0 16px 40px rgba(249,115,22,.2); }
+
+  /* Accent bar at top */
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    border-radius: 24px 24px 0 0;
+    opacity: 0; transition: opacity .2s;
+  }
+  .card:hover::before { opacity: 1; }
+  .card-checkin::before  { background: linear-gradient(90deg, var(--green), #4ADE80); }
+  .card-checkout::before { background: linear-gradient(90deg, var(--orange), var(--amber)); }
+
+  .card-icon {
+    width: 56px; height: 56px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; margin-bottom: 20px;
+    transition: transform .2s;
+  }
+  .card:hover .card-icon { transform: scale(1.1) rotate(-4deg); }
+  .card-checkin  .card-icon { background: #DCFCE7; }
+  .card-checkout .card-icon { background: #FEF3C7; }
+
+  .card-label {
+    font-size: .65rem; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .card-checkin  .card-label { color: var(--green); }
+  .card-checkout .card-label { color: var(--orange); }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem; font-weight: 700;
+    line-height: 1.15; margin-bottom: 10px; color: var(--text);
+  }
+
+  .card-desc {
+    font-size: .85rem; color: var(--muted); line-height: 1.6;
+    font-weight: 500; flex: 1;
+  }
+
+  .card-footer {
+    margin-top: 24px; padding-top: 18px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .card-who {
+    font-size: .72rem; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+
+  .card-arrow {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; font-weight: 700;
+    transition: transform .2s, background .2s;
+  }
+  .card-checkin  .card-arrow { background: #DCFCE7; color: #166534; }
+  .card-checkout .card-arrow { background: #FEF3C7; color: #92400E; }
+  .card:hover .card-arrow { transform: translateX(4px); }
+
+  /* ── FEATURES LIST ── */
+  .features {
+    display: flex; flex-direction: column; gap: 6px;
+    margin: 12px 0 0;
+  }
+  .feature {
+    display: flex; align-items: center; gap: 8px;
+    font-size: .78rem; color: var(--muted); font-weight: 500;
+  }
+  .feature-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .card-checkin  .feature-dot { background: var(--green); }
+  .card-checkout .feature-dot { background: var(--orange); }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 48px; text-align: center;
+    font-size: .72rem; color: var(--muted); font-weight: 500;
+    letter-spacing: .03em;
+    animation: fadeUp .5s .3s ease both;
+  }
+  .footer strong { color: var(--text); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 500px) {
+    .cards { grid-template-columns: 1fr; }
+    .hero-title { font-size: 2.6rem; }
+    .card { padding: 24px 22px 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="org-badge">India Christian Assembly NJ</div>
+
+  <div class="hero">
+    <div class="hero-eyebrow">Vacation Bible School</div>
+    <h1 class="hero-title">VBS <span>2026</span></h1>
+    <p class="hero-sub">Staff Portal · Command Center</p>
+    <div class="dates">
+      <div class="date-chip"><strong>Day 1</strong> · Thu, July 9</div>
+      <div class="date-chip"><strong>Day 2</strong> · Fri, July 10</div>
+      <div class="date-chip"><strong>Day 3</strong> · Sat, July 11</div>
+    </div>
+  </div>
+
+  <div class="cards">
+
+    <!-- CHECK IN -->
+    <a class="card card-checkin" href="checkin.html">
+      <div class="card-icon">✅</div>
+      <div class="card-label">Registration Desk</div>
+      <div class="card-title">Check In</div>
+      <div class="card-desc">Welcome children as they arrive. Search by name, verify details, and mark attendance for each VBS day.</div>
+      <div class="features">
+        <div class="feature"><div class="feature-dot"></div>Search child by name</div>
+        <div class="feature"><div class="feature-dot"></div>View allergy alerts</div>
+        <div class="feature"><div class="feature-dot"></div>Live attendance counters</div>
+        <div class="feature"><div class="feature-dot"></div>Class-by-class breakdown</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-who">👤 Registration Volunteers</div>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- CHECK OUT -->
+    <a class="card card-checkout" href="checkout.html">
+      <div class="card-icon">🏁</div>
+      <div class="card-label">Teacher View</div>
+      <div class="card-title">Check Out</div>
+      <div class="card-desc">Release children safely at the end of each session. Confirm lanyard collection and record departure time.</div>
+      <div class="features">
+        <div class="feature"><div class="feature-dot"></div>Filter by class</div>
+        <div class="feature"><div class="feature-dot"></div>Lanyard confirmation</div>
+        <div class="feature"><div class="feature-dot"></div>Teacher name logging</div>
+        <div class="feature"><div class="feature-dot"></div>Real-time sync</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-who">👤 Class Teachers</div>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    <strong>VBS 2026</strong> · India Christian Assembly NJ · Staff use only
+  </div>
+
+</div>
+</body>
+</html>
