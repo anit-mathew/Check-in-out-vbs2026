@@ -75,6 +75,50 @@
     padding: 10px 24px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
   }
   .live-stat { display: flex; align-items: center; gap: 8px; }
+  .clickable-stat {
+    cursor: pointer; padding: 6px 12px; border-radius: 12px;
+    transition: background .15s, transform .1s;
+  }
+  .clickable-stat:hover { background: rgba(0,0,0,.05); transform: translateY(-1px); }
+  .clickable-stat:active { transform: scale(.97); }
+
+  /* Filter Modal */
+  .fm-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300;
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .fm-overlay.open { opacity: 1; pointer-events: all; }
+  .fm-modal {
+    background: white; border-radius: 24px 24px 0 0; width: 100%; max-width: 680px;
+    max-height: 80vh; display: flex; flex-direction: column;
+    transform: translateY(100%); transition: transform .3s cubic-bezier(.34,1.2,.64,1);
+    overflow: hidden;
+  }
+  .fm-overlay.open .fm-modal { transform: translateY(0); }
+  .fm-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: white; z-index: 1;
+  }
+  .fm-title { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--text); }
+  .fm-close {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: var(--bg); font-size: 1rem; cursor: pointer; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fm-list { overflow-y: auto; padding: 12px 16px 32px; }
+  .fm-row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .fm-row:last-child { border-bottom: none; }
+  .fm-avatar { font-size: 1.5rem; width: 36px; text-align: center; }
+  .fm-name { font-weight: 800; font-size: .95rem; }
+  .fm-meta { font-size: .78rem; color: var(--muted); font-weight: 600; }
+  .fm-badge-out  { margin-left: auto; background: #DCFCE7; color: #166534; padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 800; white-space: nowrap; }
+  .fm-badge-in   { margin-left: auto; background: #EDE9FE; color: #4F46E5; padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 800; white-space: nowrap; }
+  .fm-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-weight: 700; font-size: .9rem; }
   .live-dot { width: 10px; height: 10px; border-radius: 50%; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
   .live-num { font-family: 'Fredoka One', cursive; font-size: 1.3rem; }
@@ -85,7 +129,7 @@
 
   /* ── TEACHER NAME ── */
   .teacher-card { background: var(--card); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
-  .teacher-label { font-weight: 800; font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .teacher-label { font-weight: 800; font-size: .85rem; color: var(--primary); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
   .teacher-input {
     width: 100%; padding: 12px 16px; font-size: 1rem; border: 2px solid var(--border);
     border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 700;
@@ -251,17 +295,17 @@
 
   <!-- LIVE BAR -->
   <div class="live-bar">
-    <div class="live-stat">
+    <div class="live-stat clickable-stat" onclick="showFilterModal('all')">
       <div class="live-dot" style="background:#4F46E5"></div>
       <div class="live-num" id="cnt-total">—</div>
       <div class="live-lbl">Arrived Today</div>
     </div>
-    <div class="live-stat">
+    <div class="live-stat clickable-stat" onclick="showFilterModal('out')">
       <div class="live-dot" style="background:#22C55E"></div>
       <div class="live-num" id="cnt-out">—</div>
       <div class="live-lbl">Gone Home ✅</div>
     </div>
-    <div class="live-stat">
+    <div class="live-stat clickable-stat" onclick="showFilterModal('inside')">
       <div class="live-dot" style="background:#EF4444"></div>
       <div class="live-num" id="cnt-remain">—</div>
       <div class="live-lbl">Still Inside 🏠</div>
@@ -276,10 +320,10 @@
     <!-- WARN -->
     <div class="warn-box" id="sel-warn">🚨 Please select a Day and your Class above to see your kids list.</div>
 
-    <!-- TEACHER NAME -->
+    <!-- SEARCH -->
     <div class="teacher-card" id="teacher-card" style="display:none">
-      <div class="teacher-label">👩‍🏫 Your Name (Teacher / Volunteer)</div>
-      <input class="teacher-input" id="teacher-name" type="text" placeholder="e.g. Sarah Johnson" autocomplete="off">
+      <div class="teacher-label">🔍 Search Child in Class</div>
+      <input class="teacher-input" id="class-search" type="text" placeholder="Type child's name…" autocomplete="off" oninput="filterKidsList(this.value)">
     </div>
 
     <!-- KIDS LIST -->
@@ -292,6 +336,17 @@
         <div class="empty-state"><div class="spin">⏳</div></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- FILTER MODAL -->
+<div class="fm-overlay" id="fm-overlay">
+  <div class="fm-modal">
+    <div class="fm-header">
+      <div class="fm-title" id="fm-title">All Kids</div>
+      <button class="fm-close" onclick="closeFilterModal()">✕</button>
+    </div>
+    <div class="fm-list" id="fm-list"></div>
   </div>
 </div>
 
@@ -479,6 +534,8 @@
       classKids    = [];
       _lastDay     = selectedDay;
       _lastClass   = selectedClass;
+      const srch = document.getElementById('class-search');
+      if (srch) srch.value = '';
       showLoading();
     }
 
@@ -508,6 +565,20 @@
         '<div class="empty-title">Failed to load</div>' +
         '<div class="empty-sub">Check your connection and try refreshing</div></div>';
     }
+  }
+
+  function filterKidsList(query) {
+    const q = query.trim().toLowerCase();
+    const items = document.querySelectorAll('#kids-list .kid-row');
+    let shown = 0;
+    items.forEach(function(row) {
+      const name = (row.dataset.name || '').toLowerCase();
+      const match = !q || name.includes(q);
+      row.style.display = match ? '' : 'none';
+      if (match) shown++;
+    });
+    // Update badge count
+    document.getElementById('class-badge').textContent = shown + ' kid' + (shown !== 1 ? 's' : '');
   }
 
   function showLoading() {
@@ -558,7 +629,7 @@
 
       if (isOut) {
         const rec = checkoutMap[k.ChildName];
-        return '<div class="kid-row checked-out">' +
+        return '<div class="kid-row checked-out" data-name="' + k.ChildName.toLowerCase() + '">' +
           '<div class="kid-avatar">' + emoji + '</div>' +
           '<div class="kid-info">' +
             '<div class="kid-name">' + k.ChildName + '</div>' +
@@ -569,7 +640,7 @@
         '</div>';
       }
 
-      return '<div class="kid-row" id="row-' + k.ChildName.replace(/\s/g,'_') + '">' +
+      return '<div class="kid-row" data-name="' + k.ChildName.toLowerCase() + '" id="row-' + k.ChildName.replace(/\s/g,'_') + '">' +
         '<div class="kid-avatar">' + emoji + '</div>' +
         '<div class="kid-info">' +
           '<div class="kid-name">' + k.ChildName + '</div>' +
@@ -620,7 +691,7 @@
     const kid = _pendingCheckout;
     closeLanyardModal();
 
-    const teacherName = document.getElementById('teacher-name').value.trim() || 'Teacher';
+    const teacherName = 'Teacher';
     const now  = new Date();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -664,6 +735,46 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3500);
   }
+  function showFilterModal(filter) {
+    if (!classKids.length) return;
+    const titles = { all: 'Arrived Today', out: 'Gone Home ✅', inside: 'Still Inside 🏠' };
+    document.getElementById('fm-title').textContent = titles[filter];
+
+    let kids = classKids;
+    if (filter === 'out')    kids = classKids.filter(k =>  checkoutMap[k.ChildName]);
+    if (filter === 'inside') kids = classKids.filter(k => !checkoutMap[k.ChildName]);
+
+    if (!kids.length) {
+      document.getElementById('fm-list').innerHTML = '<div class="fm-empty">No kids in this category</div>';
+    } else {
+      document.getElementById('fm-list').innerHTML = kids.map(k => {
+        const emoji  = CLASS_EMOJI[k.ClassName] || '🎒';
+        const isOut  = !!checkoutMap[k.ChildName];
+        const rec    = checkoutMap[k.ChildName];
+        const badge  = isOut
+          ? '<div class="fm-badge-out">✅ ' + formatTime(rec.CheckoutTime) + '</div>'
+          : '<div class="fm-badge-in">🏠 Inside</div>';
+        return '<div class="fm-row">' +
+          '<div class="fm-avatar">' + emoji + '</div>' +
+          '<div><div class="fm-name">' + k.ChildName + '</div>' +
+          '<div class="fm-meta">👨‍👩‍👧 ' + k.Parent + (k.Phone ? ' · 📞 ' + k.Phone : '') + '</div></div>' +
+          badge + '</div>';
+      }).join('');
+    }
+
+    document.getElementById('fm-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFilterModal() {
+    document.getElementById('fm-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('fm-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeFilterModal();
+  });
+
   loadPIN();
 </script>
 </body>
