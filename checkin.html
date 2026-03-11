@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VBS 2026 — Check In</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0F4FF;
+    --card: #FFFFFF;
+    --primary: #4F46E5;
+    --primary-light: #EEF2FF;
+    --green: #22C55E;
+    --green-light: #F0FDF4;
+    --red: #EF4444;
+    --amber: #F59E0B;
+    --text: #1A2744;
+    --muted: #7A8BAD;
+    --border: #E2E8F0;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(79,70,229,.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── PIN SCREEN ── */
+  .pin-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  }
+  .pin-box {
+    background: white; border-radius: 24px; padding: 40px 36px; width: 340px;
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  }
+  .pin-icon { font-size: 3rem; margin-bottom: 12px; }
+  .pin-title { font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: var(--text); margin-bottom: 4px; }
+  .pin-sub { color: var(--muted); font-size: .85rem; margin-bottom: 24px; }
+  .pin-input {
+    width: 100%; padding: 14px 16px; font-size: 1.4rem; letter-spacing: 8px;
+    text-align: center; border: 2px solid var(--border); border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; outline: none;
+    transition: border-color .2s;
+  }
+  .pin-input:focus { border-color: var(--primary); }
+  .pin-btn {
+    margin-top: 16px; width: 100%; padding: 14px; background: var(--primary);
+    color: white; border: none; border-radius: 12px; font-size: 1rem;
+    font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer;
+    transition: opacity .2s;
+  }
+  .pin-btn:hover { opacity: .9; }
+  .pin-err { color: var(--red); font-size: .82rem; margin-top: 10px; font-weight: 700; min-height: 18px; }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;
+    color: white;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-title { font-family: 'Fredoka One', cursive; font-size: 1.4rem; }
+  .header-sub { font-size: .78rem; opacity: .8; margin-top: 2px; }
+  .day-selector { display: flex; gap: 8px; }
+  .day-drop {
+    padding: 9px 14px; border-radius: 20px; border: 2px solid rgba(255,255,255,.5);
+    background: rgba(255,255,255,.15); color: white; font-weight: 800;
+    font-family: 'Nunito', sans-serif; font-size: .85rem; cursor: pointer;
+    outline: none; appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='white' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .day-drop option { background: #4F46E5; color: white; }
+
+  /* ── LIVE COUNTER ── */
+  .live-bar {
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 10px 24px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+  }
+  .live-stat { display: flex; align-items: center; gap: 8px; }
+  .live-dot { width: 10px; height: 10px; border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+  .live-num { font-family: 'Fredoka One', cursive; font-size: 1.3rem; }
+  .live-lbl { font-size: .75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── MAIN ── */
+  .main { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+
+  /* ── SEARCH ── */
+  .search-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  .search-label { font-weight: 800; font-size: .9rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; }
+  .search-input {
+    width: 100%; padding: 14px 14px 14px 44px; font-size: 1.05rem;
+    border: 2px solid var(--border); border-radius: 12px; font-family: 'Nunito', sans-serif;
+    font-weight: 700; outline: none; transition: border-color .2s; background: var(--bg);
+  }
+  .search-input:focus { border-color: var(--primary); background: white; }
+
+  /* ── RESULTS ── */
+  .results { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  .result-item {
+    background: var(--bg); border: 2px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: all .2s; gap: 12px;
+  }
+  .result-item:hover { border-color: var(--primary); background: var(--primary-light); }
+  .result-item.already-in { border-color: var(--green); background: var(--green-light); cursor: default; }
+  .result-info { flex: 1; min-width: 0; }
+  .result-name { font-weight: 800; font-size: 1rem; }
+  .result-meta { font-size: .78rem; color: var(--muted); margin-top: 3px; }
+  .result-grade {
+    font-size: .7rem; font-weight: 800; padding: 3px 10px; border-radius: 20px;
+    background: var(--primary); color: white; white-space: nowrap;
+  }
+  .checkin-btn {
+    padding: 10px 18px; background: var(--primary); color: white; border: none;
+    border-radius: 10px; font-weight: 800; font-family: 'Nunito', sans-serif;
+    font-size: .85rem; cursor: pointer; white-space: nowrap; transition: all .2s;
+  }
+  .checkin-btn:hover { background: #4338CA; transform: scale(1.03); }
+  .already-badge {
+    padding: 8px 14px; background: var(--green); color: white; border-radius: 10px;
+    font-weight: 800; font-size: .8rem; white-space: nowrap;
+  }
+  .allergy-tag {
+    display: inline-block; background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;
+    border-radius: 6px; padding: 2px 8px; font-size: .72rem; font-weight: 800; margin-top: 4px;
+  }
+  .no-results { text-align: center; padding: 24px; color: var(--muted); font-weight: 700; }
+
+  /* ── SUCCESS TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--green); color: white; padding: 16px 28px; border-radius: 16px;
+    font-weight: 800; font-size: 1rem; box-shadow: 0 8px 32px rgba(34,197,94,.4);
+    transition: transform .4s cubic-bezier(.34,1.56,.64,1); z-index: 999;
+    text-align: center; min-width: 280px;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast-name { font-family: 'Fredoka One', cursive; font-size: 1.3rem; }
+  .toast-detail { font-size: .82rem; opacity: .9; margin-top: 4px; }
+
+  /* ── CONFIRMATION MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: white; border-radius: 24px; padding: 32px; width: 100%; max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2); transform: scale(.95); transition: transform .2s;
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-head { text-align: center; margin-bottom: 24px; }
+  .modal-emoji { font-size: 3rem; margin-bottom: 8px; }
+  .modal-title { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--text); }
+  .modal-sub { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+  .modal-info { background: var(--bg); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+  .modal-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: .9rem; }
+  .modal-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+  .modal-key { color: var(--muted); font-weight: 700; }
+  .modal-val { font-weight: 800; text-align: right; }
+  .modal-allergy { background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 14px; margin-bottom: 20px; font-size: .85rem; font-weight: 700; color: #92400E; }
+  .modal-btns { display: flex; gap: 10px; }
+  .btn-cancel { flex: 1; padding: 14px; border: 2px solid var(--border); border-radius: 12px; background: white; font-weight: 800; font-family: 'Nunito', sans-serif; font-size: .95rem; cursor: pointer; color: var(--muted); }
+  .btn-confirm { flex: 2; padding: 14px; background: var(--green); border: none; border-radius: 12px; color: white; font-weight: 800; font-family: 'Nunito', sans-serif; font-size: .95rem; cursor: pointer; transition: opacity .2s; }
+  .btn-confirm:hover { opacity: .9; }
+  .btn-confirm:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 48px 24px; }
+  .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-title { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--muted); }
+  .empty-sub { font-size: .85rem; color: var(--muted); margin-top: 6px; }
+
+  /* ── LOADING ── */
+  .spin { display: inline-block; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .refresh-btn {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; background: white; border: 2px solid var(--border);
+    border-radius: 20px; font-weight: 800; font-family: 'Nunito', sans-serif;
+    font-size: .78rem; cursor: pointer; color: var(--primary); transition: all .2s;
+  }
+  .refresh-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+  .refresh-btn.spinning .r-icon { display: inline-block; animation: spin .6s linear infinite; }
+  /* ── STATS BAR ── */
+  .stats-bar { background: white; border-bottom: 1px solid var(--border); padding: 12px 24px; }
+  .stats-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+  .stats-totals { display: flex; gap: 10px; flex-wrap: wrap; }
+  .total-pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-family: 'Nunito', sans-serif; transition: transform .15s, box-shadow .15s; }
+  .total-pill:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+  .total-pill.green  { background: #F0FDF4; border: 1.5px solid #86EFAC; }
+  .total-pill.amber  { background: #FFFBEB; border: 1.5px solid #FCD34D; }
+  .total-pill.indigo { background: #EEF2FF; border: 1.5px solid #A5B4FC; }
+  .tp-num { font-family: 'Fredoka One', cursive; font-size: 1.3rem; line-height: 1; }
+  .total-pill.green  .tp-num  { color: #16A34A; }
+  .total-pill.amber  .tp-num  { color: #D97706; }
+  .total-pill.indigo .tp-num  { color: #4F46E5; }
+  .tp-lbl { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+  .stats-actions { display: flex; align-items: center; gap: 12px; }
+
+  /* ── CLASS GRID ── */
+  .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+  .class-chip {
+    background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 8px 10px; text-align: center; transition: all .2s;
+  }
+  .class-chip.has-kids { border-color: var(--primary); background: var(--primary-light); }
+  .cc-emoji { font-size: 1.1rem; }
+  .cc-name { font-size: .65rem; font-weight: 800; color: var(--muted); margin: 2px 0; text-transform: uppercase; letter-spacing: .3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-nums { display: flex; justify-content: center; gap: 6px; margin-top: 2px; }
+  .cc-in  { font-size: .72rem; font-weight: 800; color: #16A34A; }
+  .cc-out { font-size: .72rem; font-weight: 800; color: #D97706; }
+  .cc-rem { font-size: .72rem; font-weight: 800; color: #4F46E5; }
+
+  .day-drop {
+    padding: 9px 16px; border-radius: 20px; border: 2px solid rgba(255,255,255,.5);
+    background: rgba(255,255,255,.15); color: white; font-weight: 800;
+    font-family: 'Nunito', sans-serif; font-size: .85rem; cursor: pointer;
+    outline: none; appearance: none; -webkit-appearance: none; min-width: 200px;
+  }
+  .day-drop option { background: #4F46E5; color: white; }
+  .stats-bar { background: white; border-bottom: 1px solid var(--border); padding: 14px 24px; }
+  .stats-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+  .stats-totals { display: flex; gap: 10px; flex-wrap: wrap; }
+  .total-pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; }
+  .total-pill.green  { background: #F0FDF4; border: 1.5px solid #86EFAC; }
+  .total-pill.amber  { background: #FFFBEB; border: 1.5px solid #FCD34D; }
+  .total-pill.indigo { background: #EEF2FF; border: 1.5px solid #A5B4FC; }
+  .tp-num { font-family: 'Fredoka One', cursive; font-size: 1.3rem; line-height: 1; }
+  .total-pill.green  .tp-num { color: #16A34A; }
+  .total-pill.amber  .tp-num { color: #D97706; }
+  .total-pill.indigo .tp-num { color: #4F46E5; }
+  .tp-lbl { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+  .stats-actions { display: flex; align-items: center; gap: 12px; }
+  .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+  .class-chip { background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 8px; text-align: center; }
+  .class-chip.has-kids { border-color: var(--primary); background: var(--primary-light); }
+  .cc-emoji { font-size: 1.1rem; }
+  .cc-name { font-size: .62rem; font-weight: 800; color: var(--muted); margin: 2px 0; text-transform: uppercase; letter-spacing: .3px; }
+  .cc-nums { display: flex; justify-content: center; gap: 5px; margin-top: 3px; }
+  .cc-in  { font-size: .7rem; font-weight: 800; color: #16A34A; }
+  .cc-out { font-size: .7rem; font-weight: 800; color: #D97706; }
+  .cc-rem { font-size: .7rem; font-weight: 800; color: #4F46E5; }
+  @media (max-width: 480px) {
+    .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .live-bar { gap: 16px; }
+    .modal { padding: 24px; }
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+
+  /* Filter Modal */
+  .fm-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300;
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .fm-overlay.open { opacity: 1; pointer-events: all; }
+  .fm-modal {
+    background: white; border-radius: 24px 24px 0 0; width: 100%; max-width: 680px;
+    max-height: 80vh; display: flex; flex-direction: column;
+    transform: translateY(100%); transition: transform .3s cubic-bezier(.34,1.2,.64,1);
+    overflow: hidden;
+  }
+  .fm-overlay.open .fm-modal { transform: translateY(0); }
+  .fm-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: white; z-index: 1;
+  }
+  .fm-title { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--text); }
+  .fm-close {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: var(--bg); font-size: 1rem; cursor: pointer; font-weight: 800;
+  }
+  .fm-list { overflow-y: auto; padding: 12px 16px 32px; }
+  .fm-row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .fm-row:last-child { border-bottom: none; }
+  .fm-avatar { font-size: 1.5rem; width: 36px; text-align: center; }
+  .fm-name { font-weight: 800; font-size: .95rem; }
+  .fm-meta { font-size: .78rem; color: var(--muted); font-weight: 600; }
+  .fm-badge-out  { margin-left: auto; background: #DCFCE7; color: #166534; padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 800; white-space: nowrap; }
+  .fm-badge-in   { margin-left: auto; background: #EDE9FE; color: #4F46E5; padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 800; white-space: nowrap; }
+  .fm-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div class="pin-screen" id="pin-screen">
+  <div class="pin-box">
+    <div class="pin-icon">⛪</div>
+    <div class="pin-title">VBS 2026</div>
+    <div class="pin-sub">Enter PIN to access Check-In</div>
+    <input class="pin-input" type="password" id="pin-input" maxlength="6" placeholder="••••" onkeydown="if(event.key==='Enter')verifyPin()">
+    <button class="pin-btn" id="pin-btn" onclick="verifyPin()">Enter →</button>
+    <div class="pin-err" id="pin-err"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div>
+        <div class="header-title">✅ VBS 2026 — Check In</div>
+        <div class="header-sub">India Christian Assembly NJ · Registration Desk</div>
+      </div>
+    </div>
+    <div class="day-selector">
+      <select class="day-drop" id="day-drop" onchange="setDay(parseInt(this.value))">
+        <option value="0">📅 Select Day…</option>
+        <option value="1">Day 1 · July 9 (Thu)</option>
+        <option value="2">Day 2 · July 10 (Fri)</option>
+        <option value="3">Day 3 · July 11 (Sat)</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- LIVE COUNTER -->
+  <div class="stats-bar">
+    <div class="stats-top">
+      <div class="stats-totals">
+        <div class="total-pill green" onclick="showFilterModal('all')" style="cursor:pointer"><span class="tp-num" id="cnt-in">—</span><span class="tp-lbl">Arrived Today</span></div>
+        <div class="total-pill amber" onclick="showFilterModal('out')" style="cursor:pointer"><span class="tp-num" id="cnt-out">—</span><span class="tp-lbl">Gone Home ✅</span></div>
+        <div class="total-pill indigo" onclick="showFilterModal('inside')" style="cursor:pointer"><span class="tp-num" id="cnt-inside">—</span><span class="tp-lbl">Still Inside 🏠</span></div>
+      </div>
+      <div class="stats-actions">
+        <div id="day-label" style="font-size:.78rem;color:var(--muted);font-weight:700"></div>
+        <button class="refresh-btn" id="refresh-btn" onclick="manualRefresh()"><span class="r-icon">↻</span> Refresh</button>
+      </div>
+    </div>
+    <div class="class-grid" id="class-grid"></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- DAY WARNING -->
+    <div id="day-warn" style="background:#FEE2E2;border:2px solid #EF4444;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-weight:800;color:#991B1B;font-size:.9rem;animation:shake .4s ease">
+      🚨 Please select a day (Day 1 / Day 2 / Day 3) before checking in kids.
+    </div>
+
+    <!-- SEARCH CARD -->
+    <div class="search-card">
+      <div class="search-label">🔍 Search Child by Name</div>
+      <div class="search-wrap">
+        <span class="search-icon">🧒</span>
+        <input class="search-input" id="search-input" type="text" placeholder="Type child's name…" oninput="searchKids(this.value)" autocomplete="off">
+      </div>
+      <div class="results" id="results">
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-title">Start typing to search</div>
+          <div class="empty-sub">Search by child's first or last name</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONFIRMATION MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-emoji">✅</div>
+      <div class="modal-title" id="modal-title">Check In Child</div>
+      <div class="modal-sub" id="modal-sub"></div>
+    </div>
+    <div class="modal-info" id="modal-info"></div>
+    <div id="modal-allergy"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" id="btn-confirm" onclick="confirmCheckin()">✅ Confirm Check In</button>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER MODAL -->
+<div class="fm-overlay" id="fm-overlay">
+  <div class="fm-modal">
+    <div class="fm-header">
+      <div class="fm-title" id="fm-title">All Kids</div>
+      <button class="fm-close" onclick="closeFilterModal()">✕</button>
+    </div>
+    <div class="fm-list" id="fm-list"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-name" id="toast-name"></div>
+  <div class="toast-detail" id="toast-detail"></div>
+</div>
+
+<script>
+  /* ── CONFIG ── */
+  const PIN_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT38JPjqiXUW0H85VwRLXmCx71V9ymCsl26_8o8QOKb3lWoBNkZzqVY9uyLFNyHMUEanWhKSxvVm3ud/pub?output=csv';
+  let PIN = null; // loaded from sheet on startup
+  const SCRIPT_URL   = 'https://script.google.com/macros/s/AKfycbzThd9cxNs_dkbbpunmpcRrWUPE-LV-b0blF62cNtHL33h879-v2pm4TqsnYtUsK7JUuQ/exec';
+  const CSV_KIDS     = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQI-vHJhZBtLtBBn94Eq_0beJYuNhywqgP4dpgpd0sjPfvPzgnLq8NtAAQvYTmN_0OBFpb7X1q-G20Y/pub?output=csv";
+  // Reads now use Apps Script doGet — instant, no CSV cache delay
+
+  const GRADE_CLASS = {
+    'Pre':'Pre-K', 'K':'Kindergarten', '1st':'1st Grade', '2nd':'2nd Grade',
+    '3rd':'3rd Grade', '4th':'4th Grade', '5th':'5th Grade', '6th':'6th Grade',
+    '7th':'7th Grade', '8th':'8th Grade'
+  };
+  const CLASS_EMOJI = {
+    'Pre-K':'🎈','Kindergarten':'🌟','1st Grade':'📚','2nd Grade':'✏️',
+    '3rd Grade':'🚀','4th Grade':'⚽','5th Grade':'🔥','6th Grade':'🎨',
+    '7th Grade':'👑','8th Grade':'🏆'
+  };
+
+  /* ── STATE ── */
+  let allKids    = [];
+  let checkedIn  = {}; // key: childName+day -> record
+  let selectedDay = 0;
+  let pendingKid  = null;
+
+  /* ── PIN ── */
+  async function loadPIN() {
+    const btn = document.getElementById('pin-btn');
+    const err = document.getElementById('pin-err');
+    btn.disabled = true;
+    btn.textContent = '⏳ Loading…';
+    err.textContent = '';
+    try {
+      const res  = await fetch(PIN_CSV + '&t=' + Date.now());
+      const text = await res.text();
+      const rows = text.trim().split(/\r?\n/);
+      if (rows.length >= 2) {
+        const checkinRow = rows[1]; // Row 2 = Check-in
+        const cols = checkinRow.split(',');
+        PIN = (cols[1] || '').trim().replace(/"/g, '').replace(/\r/g, '').replace(/\s/g, '');
+      }
+      if (PIN) {
+        // Already verified this session — skip PIN screen
+        if (sessionStorage.getItem('vbs_checkin_auth') === '1') {
+          document.getElementById('pin-screen').style.display = 'none';
+          document.getElementById('app').style.display = 'block';
+          loadKids();
+          setInterval(loadCheckins, 15000);
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Enter →';
+          document.getElementById('pin-input').focus();
+        }
+      } else {
+        err.textContent = '⚠️ Could not load PIN. Tap Retry.';
+        btn.textContent = 'Retry';
+        btn.disabled = false;
+        btn.onclick = loadPIN;
+      }
+    } catch(e) {
+      console.error('loadPIN error:', e);
+      err.textContent = '⚠️ Network error. Tap Retry.';
+      btn.textContent = 'Retry';
+      btn.disabled = false;
+      btn.onclick = loadPIN;
+    }
+  }
+
+  function verifyPin() {
+    const val = document.getElementById('pin-input').value;
+    if (!PIN) {
+      document.getElementById('pin-err').textContent = '⏳ Loading… please try again.';
+      return;
+    }
+    if (val === PIN) {
+      sessionStorage.setItem('vbs_checkin_auth', '1');
+      document.getElementById('pin-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadKids();
+      setInterval(loadCheckins, 15000);
+    } else {
+      document.getElementById('pin-err').textContent = '❌ Incorrect PIN. Try again.';
+      document.getElementById('pin-input').value = '';
+    }
+  }
+
+  /* ── DAY ── */
+  function setDay(d) {
+    selectedDay = d;
+    if (!d) return;
+    document.getElementById('day-warn').style.display = 'none';
+    document.getElementById('day-label').textContent = 'Day ' + d + ' · July ' + (8+d);
+    loadCheckins();
+    searchKids(document.getElementById('search-input').value);
+  }
+
+  /* ── CSV PARSER ── */
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const headers = splitLine(lines[0]).map(h => h.trim().replace(/^"|"$/g, ''));
+    return lines.slice(1).filter(l => l.trim()).map(line => {
+      const vals = splitLine(line);
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = (vals[i] || '').trim().replace(/^"|"$/g, ''));
+      return obj;
+    });
+  }
+  function splitLine(line) {
+    const r = []; let c = '', q = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { q = !q; }
+      else if (line[i] === ',' && !q) { r.push(c); c = ''; }
+      else c += line[i];
+    }
+    r.push(c); return r;
+  }
+
+  /* ── LOAD KIDS ── */
+  async function loadKids() {
+    try {
+      const res = await fetch(CSV_KIDS + '&t=' + Date.now());
+      const rows = parseCSV(await res.text());
+      allKids = [];
+      rows.forEach(r => {
+        const p = r["Parent's Full Name"] || '';
+        const phone = r["Phone Number"] || r["Phone"] || r["phone"] || '';
+        const add = (n, g, gr, ts, al) => {
+          if (n && n.trim()) {
+            const grKey = Object.keys(GRADE_CLASS).find(k => gr && gr.includes(k)) || '';
+            allKids.push({
+              name: n.trim(), gender: g || '', grade: gr || '',
+              className: GRADE_CLASS[grKey] || gr || 'Unknown',
+              tshirt: ts || '', allergies: al || 'None',
+              parent: p, phone: phone
+            });
+          }
+        };
+        add(r["Child #1 Name"], r["Gender"],    r["Grade in Spetmber"],    r["T Shirt Size"],    r["Allergies"]);
+        add(r["Child #2 Name"], r["Gender (1)"], r["Grade in Spetmber (1)"], r["T Shirt Size (1)"], r["Allergies (1)"]);
+        add(r["Child #3 Name"], r["Gender (2)"], r["Grade in Spetmber (2)"], r["T Shirt Size (2)"], r["Allergies (2)"]);
+      });
+    } catch(e) { console.error('Failed to load kids:', e); }
+  }
+
+  /* ── LOAD CHECK-INS ── */
+  async function loadCheckins() {
+    if (!selectedDay) return;
+    try {
+      const url = SCRIPT_URL + '?action=read&secret=' + PIN + '&day=' + selectedDay + '&t=' + Date.now();
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.status !== 'ok') return;
+      checkedIn = {};
+      json.data.forEach(r => {
+        // Fix any bad Date objects serialized as 1899-12-30T... strings
+        ['CheckinTime','CheckoutTime'].forEach(function(field) {
+          const v = r[field] || '';
+          if (v.includes('1899') || v.includes('T')) {
+            try {
+              const d = new Date(v);
+              const hrs = d.getHours(), mins = String(d.getMinutes()).padStart(2,'0');
+              r[field] = (hrs % 12 || 12) + ':' + mins + ' ' + (hrs >= 12 ? 'PM' : 'AM');
+            } catch(e) { r[field] = ''; }
+          }
+        });
+        checkedIn[r.ChildName] = r;
+      });
+      updateCounters();
+      searchKids(document.getElementById('search-input').value);
+    } catch(e) { console.error('Failed to load checkins:', e); }
+  }
+
+  /* ── COUNTERS ── */
+  const CLASSES = [
+    {name:'Pre-K',  emoji:'🎈', key:'Pre-K'},
+    {name:'Kinder', emoji:'🌟', key:'Kindergarten'},
+    {name:'1st',    emoji:'📚', key:'1st Grade'},
+    {name:'2nd',    emoji:'✏️', key:'2nd Grade'},
+    {name:'3rd',    emoji:'🚀', key:'3rd Grade'},
+    {name:'4th',    emoji:'⚽', key:'4th Grade'},
+    {name:'5th',    emoji:'🔥', key:'5th Grade'},
+    {name:'6th',    emoji:'🎨', key:'6th Grade'},
+    {name:'7th',    emoji:'👑', key:'7th Grade'},
+    {name:'8th',    emoji:'🏆', key:'8th Grade'}
+  ];
+
+  function isOut(r) { return r.CheckoutTime && r.CheckoutTime.trim() !== ''; }
+
+  function updateCounters() {
+    const all      = Object.values(checkedIn);
+    const inCount  = all.length;
+    const outCount = all.filter(r => isOut(r)).length;
+    document.getElementById('cnt-in').textContent     = inCount;
+    document.getElementById('cnt-out').textContent    = outCount;
+    document.getElementById('cnt-inside').textContent = inCount - outCount;
+    renderClassGrid();
+  }
+
+  function renderClassGrid() {
+    const grid = document.getElementById('class-grid');
+    if (!grid) return;
+    grid.innerHTML = CLASSES.map(function(cls) {
+      const kids   = Object.values(checkedIn).filter(function(r){ return r.ClassName === cls.key; });
+      const inCnt  = kids.length;
+      const outCnt = kids.filter(function(r){ return isOut(r); }).length;
+      const rem    = inCnt - outCnt;
+      const numsHtml = inCnt > 0
+        ? '<div class="cc-nums">'
+          + '<span class="cc-in" title="Arrived" onclick="event.stopPropagation();showClassModal(this)">'  + inCnt  + '↓</span>'
+          + '<span class="cc-out" title="Gone Home" onclick="event.stopPropagation();showClassModal(this)">' + outCnt + '↑</span>'
+          + '<span class="cc-rem" title="Still Inside" onclick="event.stopPropagation();showClassModal(this)">' + rem + '●</span>'
+          + '</div>'
+        : '<div class="cc-nums"><span style="font-size:.65rem;color:var(--muted)">—</span></div>';
+      return '<div class="class-chip' + (inCnt > 0 ? ' has-kids' : '') + '"'
+        + ' data-class="' + cls.key + '"'
+        + ' data-label="' + cls.emoji + ' ' + cls.name + '"'
+        + ' onclick="showClassModal(this)"'
+        + ' style="cursor:pointer">'
+        + '<div class="cc-emoji">' + cls.emoji + '</div>'
+        + '<div class="cc-name">' + cls.name + '</div>'
+        + numsHtml
+        + '</div>';
+    }).join('');
+  }
+
+  /* ── SEARCH ── */
+  function searchKids(query) {
+    const el = document.getElementById('results');
+    const q  = query.trim().toLowerCase();
+    if (!q) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Start typing to search</div><div class="empty-sub">Search by child\'s first or last name</div></div>';
+      return;
+    }
+    const found = allKids.filter(k => k.name.toLowerCase().includes(q));
+    if (!found.length) {
+      el.innerHTML = '<div class="no-results">😕 No child found for "' + query + '"</div>';
+      return;
+    }
+    el.innerHTML = found.map(k => {
+      const alreadyIn = checkedIn[k.name];
+      const emoji = CLASS_EMOJI[k.className] || '🎒';
+      const allergyHtml = k.allergies && k.allergies !== 'None'
+        ? '<span class="allergy-tag">⚠️ ' + k.allergies + '</span>' : '';
+      if (alreadyIn && !alreadyIn.CheckoutTime) {
+        return '<div class="result-item already-in">' +
+          '<div class="result-info">' +
+            '<div class="result-name">' + k.name + '</div>' +
+            '<div class="result-meta">' + emoji + ' ' + k.className + ' · 👨‍👩‍👧 ' + k.parent + '</div>' +
+            (allergyHtml ? '<div>' + allergyHtml + '</div>' : '') +
+          '</div>' +
+          '<div class="already-badge">✅ Checked In</div>' +
+        '</div>';
+      }
+      return '<div class="result-item" onclick="openModal(' + JSON.stringify(k).replace(/"/g,"'") + ')">' +
+        '<div class="result-info">' +
+          '<div class="result-name">' + k.name + '</div>' +
+          '<div class="result-meta">' + emoji + ' ' + k.className + ' · 👨‍👩‍👧 ' + k.parent + '</div>' +
+          (allergyHtml ? '<div>' + allergyHtml + '</div>' : '') +
+        '</div>' +
+        '<span class="result-grade">' + (k.grade || '—') + '</span>' +
+        '<button class="checkin-btn" onclick="event.stopPropagation();openModalDirect(' + allKids.indexOf(k) + ')">Check In ✅</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function openModalDirect(idx) { openModal(allKids[idx]); }
+
+  function openModal(kid) {
+    if (!selectedDay) {
+      document.getElementById('day-warn').style.display = 'block';
+      document.getElementById('day-warn').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    pendingKid = kid;
+    const emoji = CLASS_EMOJI[kid.className] || '🎒';
+    document.getElementById('modal-title').textContent = 'Check In · ' + kid.name;
+    document.getElementById('modal-sub').textContent   = 'Day ' + selectedDay + ' · July ' + (8+selectedDay);
+    document.getElementById('modal-info').innerHTML =
+      row('👤 Child',  kid.name) +
+      row(emoji + ' Class', kid.className) +
+      row('📚 Grade',  kid.grade || '—') +
+      row('👨‍👩‍👧 Parent', kid.parent) +
+      row('📞 Phone',  kid.phone || '—') +
+      row('👕 T-Shirt', kid.tshirt || '—');
+    document.getElementById('modal-allergy').innerHTML = kid.allergies && kid.allergies !== 'None'
+      ? '<div class="modal-allergy">⚠️ Allergy Alert: ' + kid.allergies + '</div>' : '';
+    document.getElementById('btn-confirm').disabled = false;
+    document.getElementById('btn-confirm').textContent = '✅ Confirm Check In';
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function row(k, v) {
+    return '<div class="modal-row"><span class="modal-key">' + k + '</span><span class="modal-val">' + v + '</span></div>';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    pendingKid = null;
+  }
+
+  /* ── CONFIRM CHECK-IN ── */
+  async function confirmCheckin() {
+    if (!pendingKid) return;
+    const btn = document.getElementById('btn-confirm');
+    btn.disabled = true;
+    btn.textContent = '⏳ Checking in…';
+
+    const now  = new Date();
+    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const payload = {
+      action:      'checkin',
+      secret:      PIN,
+      day:         selectedDay,
+      childName:   pendingKid.name,
+      className:   pendingKid.className,
+      grade:       pendingKid.grade,
+      parent:      pendingKid.parent,
+      phone:       pendingKid.phone,
+      allergies:   pendingKid.allergies,
+      checkinTime: time,
+      checkinBy:   'Registration Desk'
+    };
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      checkedIn[pendingKid.name] = { ...payload, CheckoutTime: '' };
+      updateCounters();
+      showToast(pendingKid.name, pendingKid.className, time);
+      closeModal();
+      searchKids(document.getElementById('search-input').value);
+    } catch(e) {
+      // Even if fetch fails (CORS), optimistically mark as checked in
+      checkedIn[pendingKid.name] = { ...payload, CheckoutTime: '' };
+      updateCounters();
+      showToast(pendingKid.name, pendingKid.className, time);
+      closeModal();
+      searchKids(document.getElementById('search-input').value);
+    }
+  }
+
+  /* ── TOAST ── */
+  function showToast(name, cls, time) {
+    const emoji = CLASS_EMOJI[cls] || '🎒';
+    document.getElementById('toast-name').textContent   = '✅ ' + name + ' checked in!';
+    document.getElementById('toast-detail').textContent = emoji + ' ' + cls + ' · ' + time;
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // ── FILTER MODAL ──
+  function showFilterModal(filter) {
+    if (!selectedDay) {
+      document.getElementById('day-warn').style.display = 'block';
+      document.getElementById('day-warn').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    const all = Object.values(checkedIn);
+    const titles = { all: 'Arrived Today', out: 'Gone Home ✅', inside: 'Still Inside 🏠' };
+    document.getElementById('fm-title').textContent = titles[filter];
+    if (!all.length) {
+      document.getElementById('fm-list').innerHTML = '<div class="fm-empty">No kids checked in yet for Day ' + selectedDay + '</div>';
+      document.getElementById('fm-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      return;
+    }
+    let kids = all;
+    if (filter === 'out')    kids = all.filter(r =>  r.CheckoutTime && r.CheckoutTime.trim());
+    if (filter === 'inside') kids = all.filter(r => !r.CheckoutTime || !r.CheckoutTime.trim());
+
+    if (!kids.length) {
+      document.getElementById('fm-list').innerHTML = '<div class="fm-empty">No kids in this category</div>';
+    } else {
+      document.getElementById('fm-list').innerHTML = kids.map(function(r) {
+        const emoji = CLASS_EMOJI[r.ClassName] || '🎒';
+        const isOut = r.CheckoutTime && r.CheckoutTime.trim();
+        const badge = isOut
+          ? '<div class="fm-badge-out">✅ ' + r.CheckoutTime + '</div>'
+          : '<div class="fm-badge-in">🏠 Inside</div>';
+        return '<div class="fm-row">' +
+          '<div class="fm-avatar">' + emoji + '</div>' +
+          '<div><div class="fm-name">' + r.ChildName + '</div>' +
+          '<div class="fm-meta">' + r.ClassName + (r.Parent ? ' · 👨‍👩‍👧 ' + r.Parent : '') + '</div></div>' +
+          badge + '</div>';
+      }).join('');
+    }
+    document.getElementById('fm-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFilterModal() {
+    document.getElementById('fm-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function showClassModal(el) {
+    // Walk up to the chip to get data attributes
+    const chip = el.closest ? el.closest('.class-chip') : el;
+    const classKey   = chip.dataset.class;
+    const classLabel = chip.dataset.label;
+    // Determine filter from which span was clicked
+    let filter = 'all';
+    if (el.classList && el.classList.contains('cc-out'))    filter = 'out';
+    if (el.classList && el.classList.contains('cc-rem'))    filter = 'inside';
+    if (!selectedDay) {
+      document.getElementById('day-warn').style.display = 'block';
+      document.getElementById('day-warn').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    const all = Object.values(checkedIn).filter(r => r.ClassName === classKey);
+    const filterLabels = { all: 'Arrived Today', out: 'Gone Home ✅', inside: 'Still Inside 🏠' };
+    document.getElementById('fm-title').textContent = classLabel + ' · ' + filterLabels[filter];
+
+    let kids = all;
+    if (filter === 'out')    kids = all.filter(r =>  r.CheckoutTime && r.CheckoutTime.trim());
+    if (filter === 'inside') kids = all.filter(r => !r.CheckoutTime || !r.CheckoutTime.trim());
+
+    if (!kids.length) {
+      document.getElementById('fm-list').innerHTML = '<div class="fm-empty">No kids in this category</div>';
+    } else {
+      document.getElementById('fm-list').innerHTML = kids.map(function(r) {
+        const isOut = r.CheckoutTime && r.CheckoutTime.trim();
+        const badge = isOut
+          ? '<div class="fm-badge-out">✅ ' + r.CheckoutTime + '</div>'
+          : '<div class="fm-badge-in">🏠 Inside</div>';
+        return '<div class="fm-row">' +
+          '<div class="fm-avatar">' + (CLASS_EMOJI[r.ClassName] || '🎒') + '</div>' +
+          '<div><div class="fm-name">' + r.ChildName + '</div>' +
+          '<div class="fm-meta">' + (r.Parent ? '👨‍👩‍👧 ' + r.Parent : '') + (r.CheckinTime ? ' · ✅ ' + r.CheckinTime : '') + '</div></div>' +
+          badge + '</div>';
+      }).join('');
+    }
+    document.getElementById('fm-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  document.getElementById('fm-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeFilterModal();
+  });
+
+  // Load PIN from sheet on startup
+  loadPIN();
+
+  async function manualRefresh() {
+    const btn = document.getElementById('refresh-btn');
+    btn.classList.add('spinning');
+    btn.disabled = true;
+    await Promise.all([loadKids(), loadCheckins()]);
+    searchKids(document.getElementById('search-input').value);
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+    document.getElementById('day-label').textContent =
+      selectedDay ? 'Day ' + selectedDay + ' · July ' + (8+selectedDay) + ' · Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : 'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  }
+</script>
+</body>
+</html>

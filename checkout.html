@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VBS 2026 — Check Out</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF7ED;
+    --card: #FFFFFF;
+    --primary: #F59E0B;
+    --primary-dark: #D97706;
+    --primary-light: #FFFBEB;
+    --green: #22C55E;
+    --green-light: #F0FDF4;
+    --red: #EF4444;
+    --text: #1A2744;
+    --muted: #7A8BAD;
+    --border: #E2E8F0;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(245,158,11,.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── PIN SCREEN ── */
+  .pin-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+  }
+  .pin-box {
+    background: white; border-radius: 24px; padding: 40px 36px; width: 340px;
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  }
+  .pin-icon { font-size: 3rem; margin-bottom: 12px; }
+  .pin-title { font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: var(--text); margin-bottom: 4px; }
+  .pin-sub { color: var(--muted); font-size: .85rem; margin-bottom: 24px; }
+  .pin-input {
+    width: 100%; padding: 14px 16px; font-size: 1.4rem; letter-spacing: 8px;
+    text-align: center; border: 2px solid var(--border); border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; outline: none; transition: border-color .2s;
+  }
+  .pin-input:focus { border-color: var(--primary); }
+  .pin-btn {
+    margin-top: 16px; width: 100%; padding: 14px; background: var(--primary);
+    color: white; border: none; border-radius: 12px; font-size: 1rem;
+    font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; transition: opacity .2s;
+  }
+  .pin-btn:hover { opacity: .9; }
+  .pin-err { color: var(--red); font-size: .82rem; margin-top: 10px; font-weight: 700; min-height: 18px; }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+    padding: 16px 24px; color: white;
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .header-title { font-family: 'Fredoka One', cursive; font-size: 1.4rem; }
+  .header-sub { font-size: .78rem; opacity: .85; margin-top: 2px; }
+
+  /* ── CLASS + DAY SELECTORS ── */
+  .selectors { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .sel-btn {
+    padding: 8px 14px; border-radius: 20px; border: 2px solid rgba(255,255,255,.4);
+    background: transparent; color: white; font-weight: 800; font-family: 'Nunito', sans-serif;
+    font-size: .78rem; cursor: pointer; transition: all .2s;
+  }
+  .sel-btn.active { background: white; color: #D97706; border-color: white; }
+  .sel-divider { width: 1px; background: rgba(255,255,255,.3); margin: 0 4px; }
+
+  /* ── LIVE BAR ── */
+  .live-bar {
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 10px 24px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+  }
+  .live-stat { display: flex; align-items: center; gap: 8px; }
+  .live-dot { width: 10px; height: 10px; border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+  .live-num { font-family: 'Fredoka One', cursive; font-size: 1.3rem; }
+  .live-lbl { font-size: .75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── MAIN ── */
+  .main { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+
+  /* ── TEACHER NAME ── */
+  .teacher-card { background: var(--card); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  .teacher-label { font-weight: 800; font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .teacher-input {
+    width: 100%; padding: 12px 16px; font-size: 1rem; border: 2px solid var(--border);
+    border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 700;
+    outline: none; transition: border-color .2s;
+  }
+  .teacher-input:focus { border-color: var(--primary); }
+
+  /* ── KIDS LIST ── */
+  .kids-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+  .kids-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .kids-title { font-family: 'Fredoka One', cursive; font-size: 1.1rem; }
+  .kids-badge {
+    background: var(--primary); color: white; padding: 4px 12px;
+    border-radius: 20px; font-size: .78rem; font-weight: 800;
+  }
+
+  .kid-row {
+    display: flex; align-items: center; gap: 12px; padding: 14px;
+    border: 2px solid var(--border); border-radius: 12px; margin-bottom: 10px;
+    transition: all .2s;
+  }
+  .kid-row.checked-out { background: var(--green-light); border-color: var(--green); opacity: .7; }
+  .kid-avatar {
+    width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 1.3rem; background: var(--primary-light); flex-shrink: 0;
+  }
+  .kid-info { flex: 1; min-width: 0; }
+  .kid-name { font-weight: 800; font-size: .95rem; }
+  .kid-meta { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+  .kid-allergy { font-size: .7rem; background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; border-radius: 6px; padding: 2px 7px; font-weight: 800; display: inline-block; margin-top: 3px; }
+  .kid-checkin-time { font-size: .72rem; color: var(--green); font-weight: 800; }
+
+  .checkout-btn {
+    padding: 10px 16px; background: var(--primary); color: white; border: none;
+    border-radius: 10px; font-weight: 800; font-family: 'Nunito', sans-serif;
+    font-size: .82rem; cursor: pointer; white-space: nowrap; transition: all .2s; flex-shrink: 0;
+  }
+  .checkout-btn:hover { background: var(--primary-dark); transform: scale(1.03); }
+  .out-badge {
+    padding: 8px 14px; background: var(--green); color: white; border-radius: 10px;
+    font-weight: 800; font-size: .78rem; white-space: nowrap; flex-shrink: 0;
+  }
+  .out-time { font-size: .68rem; opacity: .85; display: block; }
+
+  /* ── EMPTY / LOADING ── */
+  .empty-state { text-align: center; padding: 40px 24px; }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+  .empty-title { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--muted); }
+  .empty-sub { font-size: .82rem; color: var(--muted); margin-top: 6px; }
+  .spin { display: inline-block; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .warn-box { background: #FEE2E2; border: 2px solid #EF4444; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; font-weight: 800; color: #991B1B; font-size: .88rem; animation: shake .4s ease; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--green); color: white; padding: 16px 28px; border-radius: 16px;
+    font-weight: 800; font-size: 1rem; box-shadow: 0 8px 32px rgba(34,197,94,.4);
+    transition: transform .4s cubic-bezier(.34,1.56,.64,1); z-index: 999;
+    text-align: center; min-width: 260px;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast-name { font-family: 'Fredoka One', cursive; font-size: 1.2rem; }
+  .toast-detail { font-size: .8rem; opacity: .9; margin-top: 3px; }
+
+  .refresh-btn {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; background: white; border: 2px solid var(--border);
+    border-radius: 20px; font-weight: 800; font-family: 'Nunito', sans-serif;
+    font-size: .78rem; cursor: pointer; color: var(--primary); transition: all .2s;
+  }
+  .refresh-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+  .refresh-btn.spinning .r-icon { display: inline-block; animation: spin .6s linear infinite; }
+  .co-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .co-overlay.open { opacity: 1; pointer-events: all; }
+  .co-modal {
+    background: white; border-radius: 24px; padding: 32px 28px; width: 100%;
+    max-width: 360px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    transform: scale(.95); transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  .co-overlay.open .co-modal { transform: scale(1); }
+  .co-icon  { font-size: 3rem; margin-bottom: 10px; }
+  .co-title { font-family: "Fredoka One", cursive; font-size: 1.5rem; color: var(--text); margin-bottom: 8px; }
+  .co-sub   { font-size: .88rem; color: var(--muted); font-weight: 600; line-height: 1.5; margin-bottom: 24px; }
+  .co-btns  { display: flex; gap: 10px; }
+  .co-btn-no  { flex: 1; padding: 13px; border: 2px solid var(--border); border-radius: 12px; background: white; font-weight: 800; font-family: "Nunito",sans-serif; font-size: .9rem; cursor: pointer; color: var(--muted); transition: all .15s; }
+  .co-btn-no:hover  { border-color: var(--red); color: var(--red); }
+  .co-btn-yes { flex: 2; padding: 13px; background: var(--green); border: none; border-radius: 12px; color: white; font-weight: 800; font-family: "Nunito",sans-serif; font-size: .9rem; cursor: pointer; transition: opacity .15s; }
+  .co-btn-yes:hover { opacity: .9; }
+  .co-drop {
+    padding: 9px 18px; border-radius: 20px; border: 2px solid rgba(255,255,255,.5);
+    background: rgba(255,255,255,.15); color: white; font-weight: 800;
+    font-family: 'Nunito', sans-serif; font-size: .85rem; cursor: pointer;
+    outline: none; appearance: none; -webkit-appearance: none;
+    width: auto; min-width: 160px; max-width: 220px;
+    backdrop-filter: blur(4px);
+  }
+  .co-drop option { background: #D97706; color: white; }
+  .selectors { display: flex; gap: 8px; flex-wrap: wrap; }
+  @media (max-width: 480px) {
+    .header-top { flex-direction: column; gap: 10px; align-items: flex-start; }
+    .selectors { gap: 6px; }
+    .sel-btn { padding: 6px 10px; font-size: .72rem; }
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div class="pin-screen" id="pin-screen">
+  <div class="pin-box">
+    <div class="pin-icon">🏫</div>
+    <div class="pin-title">VBS 2026</div>
+    <div class="pin-sub">Enter PIN to access Check-Out</div>
+    <input class="pin-input" type="password" id="pin-input" maxlength="6" placeholder="••••" onkeydown="if(event.key==='Enter')verifyPin()">
+    <button class="pin-btn" id="pin-btn" onclick="verifyPin()">Enter →</button>
+    <div class="pin-err" id="pin-err"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <header class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-title">🏫 VBS 2026 — Check Out</div>
+        <div class="header-sub">India Christian Assembly NJ · Teacher View</div>
+      </div>
+    </div>
+    <div class="selectors">
+      <select class="co-drop" id="day-drop-m" onchange="setDayMobile(parseInt(this.value))">
+        <option value="0">📅 Select Day…</option>
+        <option value="1">Day 1 · July 9 (Thu)</option>
+        <option value="2">Day 2 · July 10 (Fri)</option>
+        <option value="3">Day 3 · July 11 (Sat)</option>
+      </select>
+      <select class="co-drop" id="class-drop-m" onchange="setClassMobile(this.value)">
+        <option value="">🏫 Select Class…</option>
+        <option value="Pre-K">🎈 Pre-K</option>
+        <option value="Kindergarten">🌟 Kindergarten</option>
+        <option value="1st Grade">📚 1st Grade</option>
+        <option value="2nd Grade">✏️ 2nd Grade</option>
+        <option value="3rd Grade">🚀 3rd Grade</option>
+        <option value="4th Grade">⚽ 4th Grade</option>
+        <option value="5th Grade">🔥 5th Grade</option>
+        <option value="6th Grade">🎨 6th Grade</option>
+        <option value="7th Grade">👑 7th Grade</option>
+        <option value="8th Grade">🏆 8th Grade</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- LIVE BAR -->
+  <div class="live-bar">
+    <div class="live-stat">
+      <div class="live-dot" style="background:#4F46E5"></div>
+      <div class="live-num" id="cnt-total">—</div>
+      <div class="live-lbl">Arrived Today</div>
+    </div>
+    <div class="live-stat">
+      <div class="live-dot" style="background:#22C55E"></div>
+      <div class="live-num" id="cnt-out">—</div>
+      <div class="live-lbl">Gone Home ✅</div>
+    </div>
+    <div class="live-stat">
+      <div class="live-dot" style="background:#EF4444"></div>
+      <div class="live-num" id="cnt-remain">—</div>
+      <div class="live-lbl">Still Inside 🏠</div>
+    </div>
+    <button class="refresh-btn" id="refresh-btn" onclick="manualRefresh()" title="Refresh data">
+      <span class="r-icon">↻</span> Refresh
+    </button>
+    <div style="font-size:.75rem;color:var(--muted);font-weight:700" id="context-label">Select day &amp; class</div>
+  </div>
+
+  <div class="main">
+    <!-- WARN -->
+    <div class="warn-box" id="sel-warn">🚨 Please select a Day and your Class above to see your kids list.</div>
+
+    <!-- TEACHER NAME -->
+    <div class="teacher-card" id="teacher-card" style="display:none">
+      <div class="teacher-label">👩‍🏫 Your Name (Teacher / Volunteer)</div>
+      <input class="teacher-input" id="teacher-name" type="text" placeholder="e.g. Sarah Johnson" autocomplete="off">
+    </div>
+
+    <!-- KIDS LIST -->
+    <div class="kids-card" id="kids-card" style="display:none">
+      <div class="kids-header">
+        <div class="kids-title" id="class-title">Class</div>
+        <div class="kids-badge" id="class-badge">0 kids</div>
+      </div>
+      <div id="kids-list">
+        <div class="empty-state"><div class="spin">⏳</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LANYARD MODAL -->
+<div class="co-overlay" id="co-overlay">
+  <div class="co-modal">
+    <div class="co-icon">🏷️</div>
+    <div class="co-title">Lanyard Collected?</div>
+    <div class="co-sub" id="co-sub">Confirm you have taken back the lanyard from <strong id="co-name"></strong></div>
+    <div class="co-btns">
+      <button class="co-btn-no" onclick="closeLanyardModal()">✕ Not Yet</button>
+      <button class="co-btn-yes" onclick="confirmCheckout()">✅ Yes, Collected</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-name" id="toast-name"></div>
+  <div class="toast-detail" id="toast-detail"></div>
+</div>
+
+<script>
+  const PIN_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT38JPjqiXUW0H85VwRLXmCx71V9ymCsl26_8o8QOKb3lWoBNkZzqVY9uyLFNyHMUEanWhKSxvVm3ud/pub?output=csv';
+  let PIN = null; // loaded from sheet on startup
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzThd9cxNs_dkbbpunmpcRrWUPE-LV-b0blF62cNtHL33h879-v2pm4TqsnYtUsK7JUuQ/exec';
+  // Reads now use Apps Script doGet — instant, no CSV cache delay
+
+  const CLASS_EMOJI = {
+    'Pre-K':'🎈','Kindergarten':'🌟','1st Grade':'📚','2nd Grade':'✏️',
+    '3rd Grade':'🚀','4th Grade':'⚽','5th Grade':'🔥','6th Grade':'🎨',
+    '7th Grade':'👑','8th Grade':'🏆'
+  };
+
+  let selectedDay   = 0;
+  let selectedClass = '';
+  let classKids     = []; // checked-in kids for this class+day
+  let checkoutMap   = {}; // childName -> checkout record
+
+  async function loadPIN() {
+    const btn = document.getElementById('pin-btn');
+    const err = document.getElementById('pin-err');
+    btn.disabled = true;
+    btn.textContent = '⏳ Loading…';
+    err.textContent = '';
+    try {
+      const res  = await fetch(PIN_CSV + '&t=' + Date.now());
+      const text = await res.text();
+      console.log('RAW CSV text:', JSON.stringify(text));
+      // Split on both \r\n and \n
+      const rows = text.trim().split(/\r?\n/);
+      console.log('Total rows:', rows.length, rows);
+      // Row 0 = header, Row 1 = Check-in, Row 2 = Check-out
+      if (rows.length >= 3) {
+        const checkoutRow = rows[2];
+        const cols = checkoutRow.split(',');
+        console.log('Checkout row cols:', cols);
+        PIN = (cols[1] || '').trim().replace(/"/g, '').replace(/\r/g, '').replace(/\s/g, '');
+        console.log('PIN set to:', JSON.stringify(PIN));
+      } else {
+        console.log('Not enough rows in CSV!');
+      }
+      if (PIN) {
+        // Already verified this session — skip PIN screen
+        if (sessionStorage.getItem('vbs_checkout_auth') === '1') {
+          document.getElementById('pin-screen').style.display = 'none';
+          document.getElementById('app').style.display = 'block';
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Enter →';
+          btn.onclick = verifyPin;
+          document.getElementById('pin-input').focus();
+        }
+      } else {
+        err.textContent = '⚠️ Could not load PIN. Tap Retry.';
+        btn.textContent = 'Retry';
+        btn.disabled = false;
+        btn.onclick = loadPIN;
+      }
+    } catch(e) {
+      console.error('loadPIN fetch error:', e);
+      err.textContent = '⚠️ Network error. Tap Retry.';
+      btn.textContent = 'Retry';
+      btn.disabled = false;
+      btn.onclick = loadPIN;
+    }
+  }
+
+  function verifyPin() {
+    const val = document.getElementById('pin-input').value;
+    console.log('Entered:', JSON.stringify(val), '| PIN from sheet:', JSON.stringify(PIN));
+    if (val === PIN) {
+      sessionStorage.setItem('vbs_checkout_auth', '1');
+      document.getElementById('pin-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+    } else {
+      document.getElementById('pin-err').textContent = '❌ Incorrect PIN. Try again.';
+      document.getElementById('pin-input').value = '';
+      document.getElementById('pin-input').focus();
+    }
+  }
+
+  function setDayMobile(d) {
+    selectedDay = d;
+    if (!d) return;
+    refresh();
+  }
+
+  function setClassMobile(cls) {
+    selectedClass = cls;
+    if (!cls) return;
+    refresh();
+  }
+
+  const DAY_BTNS   = ['Day 1','Day 2','Day 3'];
+  const CLASS_BTNS = ['Pre-K','Kindergarten','1st','2nd','3rd','4th','5th','6th','7th','8th'];
+
+  function setDay(d, btn) {
+    selectedDay = d;
+    // Only deactivate other day buttons — never touch class buttons
+    document.querySelectorAll('.sel-btn').forEach(b => {
+      if (DAY_BTNS.some(x => b.textContent.trim() === x)) b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    refresh();
+  }
+
+  function setClass(cls, btn) {
+    selectedClass = cls;
+    // Only deactivate other class buttons — never touch day buttons
+    document.querySelectorAll('.sel-btn').forEach(b => {
+      if (CLASS_BTNS.some(x => b.textContent.trim().includes(x))) b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    refresh();
+  }
+
+  let _refreshInterval = null;
+
+  function refresh() {
+    const hasAll = selectedDay && selectedClass;
+    document.getElementById('sel-warn').style.display     = hasAll ? 'none'  : 'block';
+    document.getElementById('teacher-card').style.display = hasAll ? 'block' : 'none';
+    document.getElementById('kids-card').style.display    = hasAll ? 'block' : 'none';
+    if (!hasAll) return;
+    document.getElementById('context-label').textContent =
+      'Day ' + selectedDay + ' · ' + selectedClass;
+    document.getElementById('class-title').textContent =
+      (CLASS_EMOJI[selectedClass] || '') + ' ' + selectedClass;
+    loadClassData();
+    if (_refreshInterval) clearInterval(_refreshInterval);
+    _refreshInterval = setInterval(loadClassData, 15000);
+  }
+
+  /* ── CSV PARSER ── */
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const headers = splitLine(lines[0]).map(h => h.trim().replace(/^"|"$/g, ''));
+    return lines.slice(1).filter(l => l.trim()).map(line => {
+      const vals = splitLine(line);
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = (vals[i] || '').trim().replace(/^"|"$/g, ''));
+      return obj;
+    });
+  }
+  function splitLine(line) {
+    const r = []; let c = '', q = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { q = !q; }
+      else if (line[i] === ',' && !q) { r.push(c); c = ''; }
+      else c += line[i];
+    }
+    r.push(c); return r;
+  }
+
+  let _lastDay = 0, _lastClass = '';
+
+  async function loadClassData() {
+    if (!selectedDay || !selectedClass) { renderDemoEmpty(); return; }
+
+    // Reset state on selection change + show loading immediately
+    const selectionChanged = (_lastDay !== selectedDay || _lastClass !== selectedClass);
+    if (selectionChanged) {
+      checkoutMap  = {};
+      classKids    = [];
+      _lastDay     = selectedDay;
+      _lastClass   = selectedClass;
+      showLoading();
+    }
+
+    try {
+      const url  = SCRIPT_URL + '?action=read&secret=' + PIN + '&day=' + selectedDay + '&class=' + encodeURIComponent(selectedClass) + '&t=' + Date.now();
+      const res  = await fetch(url);
+      const json = await res.json();
+      if (json.status !== 'ok') { renderDemoEmpty(); return; }
+
+      classKids = json.data;
+
+      const freshCheckouts = {};
+      json.data.filter(r => r.CheckoutTime && r.CheckoutTime.trim() !== '').forEach(r => {
+        freshCheckouts[r.ChildName] = r;
+      });
+      // Keep local optimistic checkouts
+      Object.keys(checkoutMap).forEach(name => {
+        if (!freshCheckouts[name]) freshCheckouts[name] = checkoutMap[name];
+      });
+      checkoutMap = freshCheckouts;
+
+      renderKids();
+    } catch(e) {
+      console.error(e);
+      document.getElementById('kids-list').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⚠️</div>' +
+        '<div class="empty-title">Failed to load</div>' +
+        '<div class="empty-sub">Check your connection and try refreshing</div></div>';
+    }
+  }
+
+  function showLoading() {
+    document.getElementById('kids-list').innerHTML =
+      '<div class="empty-state">' +
+        '<div style="font-size:2.5rem;animation:spin .8s linear infinite;display:inline-block">⏳</div>' +
+        '<div class="empty-title" style="color:var(--primary);margin-top:10px">Loading ' + selectedClass + '…</div>' +
+        '<div class="empty-sub">Fetching from Google Sheets</div>' +
+      '</div>';
+    document.getElementById('class-badge').textContent = '—';
+    ['cnt-total','cnt-out','cnt-remain'].forEach(id => document.getElementById(id).textContent = '—');
+  }
+
+  function renderDemoEmpty() {
+    document.getElementById('kids-list').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">📋</div>' +
+      '<div class="empty-title">No check-ins yet</div>' +
+      '<div class="empty-sub">Kids checked in at the entrance will appear here</div></div>';
+    document.getElementById('class-badge').textContent = '0 kids';
+    ['cnt-total','cnt-out','cnt-remain'].forEach(id => document.getElementById(id).textContent = '0');
+  }
+
+  function renderKids() {
+    const total   = classKids.length;
+    const outCnt  = Object.keys(checkoutMap).length;
+    const remain  = total - outCnt;
+    document.getElementById('class-badge').textContent  = total + ' kid' + (total !== 1 ? 's' : '');
+    document.getElementById('cnt-total').textContent   = total;
+    document.getElementById('cnt-out').textContent     = outCnt;
+    document.getElementById('cnt-remain').textContent  = remain;
+
+    if (!total) { renderDemoEmpty(); return; }
+
+    // Sort: not checked out first
+    const sorted = [...classKids].sort((a,b) => {
+      const aOut = !!checkoutMap[a.ChildName];
+      const bOut = !!checkoutMap[b.ChildName];
+      return aOut - bOut;
+    });
+
+    document.getElementById('kids-list').innerHTML = sorted.map(k => {
+      const isOut = !!checkoutMap[k.ChildName];
+      const emoji = CLASS_EMOJI[k.ClassName] || '🎒';
+      const allergyHtml = k.Allergies && k.Allergies !== 'None'
+        ? '<span class="kid-allergy">⚠️ ' + k.Allergies + '</span>' : '';
+      const checkinHtml = k.CheckinTime
+        ? '<span class="kid-checkin-time">✅ Checked in at ' + k.CheckinTime + '</span>' : '';
+
+      if (isOut) {
+        const rec = checkoutMap[k.ChildName];
+        return '<div class="kid-row checked-out">' +
+          '<div class="kid-avatar">' + emoji + '</div>' +
+          '<div class="kid-info">' +
+            '<div class="kid-name">' + k.ChildName + '</div>' +
+            '<div class="kid-meta">👨‍👩‍👧 ' + k.Parent + (k.Phone ? ' · 📞 ' + k.Phone : '') + '</div>' +
+            (allergyHtml ? '<div>' + allergyHtml + '</div>' : '') +
+          '</div>' +
+          '<div class="out-badge">✅ Out<span class="out-time">' + formatTime(rec.CheckoutTime) + '</span></div>' +
+        '</div>';
+      }
+
+      return '<div class="kid-row" id="row-' + k.ChildName.replace(/\s/g,'_') + '">' +
+        '<div class="kid-avatar">' + emoji + '</div>' +
+        '<div class="kid-info">' +
+          '<div class="kid-name">' + k.ChildName + '</div>' +
+          '<div class="kid-meta">👨‍👩‍👧 ' + k.Parent + (k.Phone ? ' · 📞 ' + k.Phone : '') + '</div>' +
+          (allergyHtml ? '<div>' + allergyHtml + '</div>' : '') +
+          (checkinHtml ? '<div>' + checkinHtml + '</div>' : '') +
+        '</div>' +
+        '<button class="checkout-btn" onclick="checkoutKid(' + JSON.stringify(k).replace(/"/g,"'") + ')">Check Out 🏁</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Format time — handles both "4:22 PM" strings and ugly Date strings
+  function formatTime(val) {
+    if (!val) return '';
+    // If it's already a clean time string like "4:22 PM", return as-is
+    if (/^\d{1,2}:\d{2}\s?(AM|PM)$/i.test(val.trim())) return val.trim();
+    // Otherwise try to parse as Date
+    try {
+      const d = new Date(val);
+      if (!isNaN(d.getTime())) {
+        const hrs  = d.getHours();
+        const mins = String(d.getMinutes()).padStart(2, '0');
+        const ampm = hrs >= 12 ? 'PM' : 'AM';
+        return (hrs % 12 || 12) + ':' + mins + ' ' + ampm;
+      }
+    } catch(e) {}
+    return val;
+  }
+
+  let _pendingCheckout = null;
+
+  function checkoutKid(kid) {
+    _pendingCheckout = kid;
+    document.getElementById('co-name').textContent = kid.ChildName;
+    document.getElementById('co-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLanyardModal() {
+    document.getElementById('co-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    _pendingCheckout = null;
+  }
+
+  async function confirmCheckout() {
+    if (!_pendingCheckout) return;
+    const kid = _pendingCheckout;
+    closeLanyardModal();
+
+    const teacherName = document.getElementById('teacher-name').value.trim() || 'Teacher';
+    const now  = new Date();
+    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const payload = {
+      action:       'checkout',
+      secret:       PIN,
+      day:          selectedDay,
+      childName:    kid.ChildName,
+      className:    kid.ClassName,
+      checkoutTime: time,
+      checkoutBy:   teacherName,
+      lanyardBack:  'Yes'
+    };
+
+    // Optimistic UI update
+    checkoutMap[kid.ChildName] = { ...kid, CheckoutTime: time, CheckoutBy: teacherName };
+    renderKids();
+    showToast(kid.ChildName, time, teacherName);
+
+    try {
+      await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+    } catch(e) { console.error('Checkout write failed:', e); }
+  }
+
+  async function manualRefresh() {
+    const btn = document.getElementById('refresh-btn');
+    btn.classList.add('spinning');
+    btn.disabled = true;
+    await loadClassData();
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+    const label = document.getElementById('context-label');
+    const base  = selectedDay && selectedClass ? 'Day ' + selectedDay + ' · ' + selectedClass : 'Select day & class';
+    label.textContent = base + ' · Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  }
+
+  function showToast(name, time, teacher) {
+    document.getElementById('toast-name').textContent   = '🏁 ' + name + ' checked out!';
+    document.getElementById('toast-detail').textContent = 'By ' + teacher + ' · ' + time + ' · 🏷️ Lanyard returned';
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+  loadPIN();
+</script>
+</body>
+</html>
